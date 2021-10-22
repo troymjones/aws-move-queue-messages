@@ -17,11 +17,13 @@ describe('handle', () => {
     };
 
     const prompt = jest.fn(() => ({ move: true }));
+    const copy = false;
 
     await handle({
       sourceQueueUrl,
       targetQueueUrl,
       maxMessages,
+      copy,
       sqs,
       prompt,
     });
@@ -40,8 +42,8 @@ describe('handle', () => {
     const copy = false;
 
     await handle({
-      sourceQueueUrl: sourceQueueUrl,
-      targetQueueUrl: targetQueueUrl,
+      sourceQueueUrl,
+      targetQueueUrl,
       copy,
       sqs,
       prompt,
@@ -52,14 +54,14 @@ describe('handle', () => {
   });
 
   test('to copy messages', async () => {
+    getCountVal = 10;
     const sqs = {
-      getCount: jest.fn(() => 3),
+      getCount: jest.fn(() => getCountVal),
       moveMessage: jest.fn(),
     };
 
     const prompt = jest.fn(() => ({ move: true }));
     const copy = true;
-    getCountVal = 10;
 
     await handle({
       sourceQueueUrl,
