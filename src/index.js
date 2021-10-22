@@ -48,7 +48,7 @@ const handleAction = (from, to, options) => {
     copy = true;
     copiedOrMoved = 'copied';
   }
-  
+
   if (!options.maxMessages) {
     questions.push(maxQuestion);
   }

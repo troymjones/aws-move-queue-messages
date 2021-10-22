@@ -47,8 +47,10 @@ const handle = async ({
 
   const promises = [];
 
-  promises.push(sqs.moveMessage(sourceQueueUrl, targetQueueUrl, copy));
-  
+  for (let i = 0; i < moveCount; i += 1) {
+    promises.push(sqs.moveMessage(sourceQueueUrl, targetQueueUrl, copy));
+  }
+
   await Promise.all(promises).then(() => {
     spinner.stop();
   }).catch((e) => {
