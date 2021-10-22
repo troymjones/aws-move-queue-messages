@@ -4,6 +4,7 @@ const handle = async ({
   sourceQueueUrl,
   targetQueueUrl,
   maxMessages,
+  copy,
   sqs,
   prompt,
   skipPrompt,
@@ -13,6 +14,11 @@ const handle = async ({
 
   if (parseInt(count, 10) === 0) {
     throw new Error(`The queue ${sourceQueueUrl} is empty!`);
+  }
+
+  let copyOrMove = 'move';
+  if (copy) {
+    copyOrMove = 'copy';
   }
 
   const maxCount = parseInt(maxMessages, 10);
@@ -26,7 +32,7 @@ const handle = async ({
       {
         type: 'confirm',
         name: 'move',
-        message: `Do you want to move ${moveCount} of ${count} messages?`,
+        message: `Do you want to ${copyOrMove} ${moveCount} of ${count} messages?`,
         default: false,
       },
     ]);
@@ -41,10 +47,8 @@ const handle = async ({
 
   const promises = [];
 
-  for (let i = 0; i < moveCount; i += 1) {
-    promises.push(sqs.moveMessage(sourceQueueUrl, targetQueueUrl));
-  }
-
+  promises.push(sqs.moveMessage(sourceQueueUrl, targetQueueUrl, copy));
+  
   await Promise.all(promises).then(() => {
     spinner.stop();
   }).catch((e) => {

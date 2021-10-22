@@ -74,7 +74,24 @@ describe('moveMessage', () => {
       deleteMessage: mockCallbackFunction(null, {}),
     });
 
-    const handle = await sqs.moveMessage(sourceQueueUrl, targetQueueUrl);
+    const handle = await sqs.moveMessage(sourceQueueUrl, targetQueueUrl, false);
+    expect(handle).toEqual('ReceiptHandle');
+  });
+
+  test('to resolve promise - copy', async () => {
+    const sqs = createClient({
+      receiveMessage: mockCallbackFunction(null, {
+        Messages: [
+          {
+            Body: 'Body',
+            ReceiptHandle: 'ReceiptHandle',
+          },
+        ],
+      }),
+      sendMessage: mockCallbackFunction(null, {}),
+    });
+
+    const handle = await sqs.moveMessage(sourceQueueUrl, targetQueueUrl, true);
     expect(handle).toEqual('ReceiptHandle');
   });
 
@@ -85,7 +102,7 @@ describe('moveMessage', () => {
       deleteMessage: mockCallbackFunction(null, {}),
     });
 
-    expect(sqs.moveMessage(sourceQueueUrl, targetQueueUrl)).rejects.toEqual({ message: 'error' });
+    expect(sqs.moveMessage(sourceQueueUrl, targetQueueUrl, false)).rejects.toEqual({ message: 'error' });
   });
 
   test('to call receiveMessage with expected parameters', async () => {
@@ -105,7 +122,7 @@ describe('moveMessage', () => {
 
     const sqs = createClient(mockSqs);
 
-    await sqs.moveMessage(sourceQueueUrl, targetQueueUrl);
+    await sqs.moveMessage(sourceQueueUrl, targetQueueUrl, false);
     expect(mockSqs.receiveMessage).toHaveBeenCalledWith(
       {
         QueueUrl: sourceQueueUrl,
@@ -134,7 +151,7 @@ describe('moveMessage', () => {
 
     const sqs = createClient(mockSqs);
 
-    await sqs.moveMessage(sourceQueueUrl, targetQueueUrl);
+    await sqs.moveMessage(sourceQueueUrl, targetQueueUrl, false);
     expect(mockSqs.sendMessage).toHaveBeenCalledWith(
       {
         MessageBody: 'Body',
@@ -240,7 +257,7 @@ describe('moveMessage', () => {
 
     const sqs = createClient(mockSqs);
 
-    await sqs.moveMessage(sourceQueueUrl, targetQueueUrl);
+    await sqs.moveMessage(sourceQueueUrl, targetQueueUrl, false);
     expect(mockSqs.deleteMessage).toHaveBeenCalledWith(
       {
         ReceiptHandle: 'ReceiptHandle',

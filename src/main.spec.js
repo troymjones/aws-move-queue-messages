@@ -37,17 +37,41 @@ describe('handle', () => {
     };
 
     const prompt = jest.fn(() => ({ move: true }));
+    const copy = false;
+
+    await handle({
+      sourceQueueUrl: sourceQueueUrl,
+      targetQueueUrl: targetQueueUrl,
+      copy,
+      sqs,
+      prompt,
+    });
+
+    expect(sqs.getCount).toHaveBeenCalled();
+    expect(sqs.moveMessage).toHaveBeenCalledWith(sourceQueueUrl, targetQueueUrl, copy);
+  });
+
+  test('to copy messages', async () => {
+    const sqs = {
+      getCount: jest.fn(() => 3),
+      moveMessage: jest.fn(),
+    };
+
+    const prompt = jest.fn(() => ({ move: true }));
+    const copy = true;
     getCountVal = 10;
 
     await handle({
       sourceQueueUrl,
       targetQueueUrl,
       maxMessages,
+      copy,
       sqs,
       prompt,
     });
 
     expect(sqs.getCount).toHaveBeenCalled();
+    expect(sqs.moveMessage).toHaveBeenCalledWith(sourceQueueUrl, targetQueueUrl, copy);
     expect(sqs.moveMessage).toHaveBeenCalledTimes(maxMessages);
   });
 
@@ -58,17 +82,20 @@ describe('handle', () => {
     };
 
     const prompt = jest.fn();
+    const copy = false;
 
     await handle({
       sourceQueueUrl,
       targetQueueUrl,
       maxMessages,
+      copy,
       sqs,
       prompt,
       skipPrompt: true,
     });
 
     expect(sqs.getCount).toHaveBeenCalled();
+    expect(sqs.moveMessage).toHaveBeenCalledWith(sourceQueueUrl, targetQueueUrl, copy);
   });
 
   describe('reject promise', () => {
@@ -79,11 +106,13 @@ describe('handle', () => {
       };
 
       const prompt = jest.fn(() => ({ move: true }));
+      const copy = false;
 
       expect(handle({
         sourceQueueUrl,
         targetQueueUrl,
         maxMessages,
+        copy,
         sqs,
         prompt,
       })).rejects.toEqual({ message: 'getCount' });
@@ -96,11 +125,13 @@ describe('handle', () => {
       };
 
       const prompt = jest.fn(() => ({ move: true }));
+      const copy = false;
 
       expect(handle({
         sourceQueueUrl,
         targetQueueUrl,
         maxMessages,
+        copy,
         sqs,
         prompt,
       })).rejects.toEqual(new Error('moveMessage'));
@@ -113,11 +144,13 @@ describe('handle', () => {
       };
 
       const prompt = jest.fn(() => ({ move: true }));
+      const copy = false;
 
       expect(handle({
         sourceQueueUrl,
         targetQueueUrl,
         maxMessages,
+        copy,
         sqs,
         prompt,
       })).rejects.toEqual(new Error('The queue https://sqs.region.amazonaws.com/123456789/srcQueue is empty!'));

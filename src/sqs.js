@@ -36,7 +36,7 @@ const createClient = (sqs) => {
     );
   });
 
-  const moveMessage = (sourceQueueUrl, targetQueueUrl) => (
+  const moveMessage = (sourceQueueUrl, targetQueueUrl, copy) => (
     new Promise(async (resolve, reject) => {
       try {
         const receivedMessage = await receiveMessage(sourceQueueUrl);
@@ -62,7 +62,9 @@ const createClient = (sqs) => {
         deleteArrays(MessageAttributes);
 
         await sendMessage(targetQueueUrl, Body, MessageAttributes);
-        await deleteMessage(sourceQueueUrl, ReceiptHandle);
+        if (!copy) {
+          await deleteMessage(sourceQueueUrl, ReceiptHandle);
+        }
 
         resolve(ReceiptHandle);
       } catch (error) {
